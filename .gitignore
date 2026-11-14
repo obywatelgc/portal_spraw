@@ -1,0 +1,23 @@
+.env
+.env.*
+!.env.example
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.sqlite3
+*.sqlite3-*
+*.log
+*.sql
+*.dump
+deployment-backups/
+backups/
+media/
+sprawy/
+staticfiles/
+*.pem
+*.key
+id_rsa*
+id_ed25519*
+# Makiety Sites mają własne repozytorium i artefakty wdrożeniowe.
+/sites/
