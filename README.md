@@ -25,3 +25,19 @@ Otwórz `http://ADRES_VM:8080/` w LAN i `/admin/`, aby zalogować się do panelu
 ## Sekrety i dane
 
 Repozytorium zawiera kod, migracje, dokumentację i przykładowe ustawienia. Hasła wpisuje się do lokalnego pliku `.env`. Kopie PostgreSQL i prywatny katalog spraw wymagają osobnego backupu. `docker compose down -v` usuwa wolumen bazy danych.
+
+## Wdrażanie main na istniejącej VM
+
+Na Windows uruchom poniższe polecenie. Skrypt działa w katalogu instalacji na VM i pobiera najnowszy commit gałęzi main.
+
+```powershell
+ssh wzportal "cd /opt/wz-portal && bash deploy.sh"
+```
+
+VM pobiera publiczne repozytorium przez HTTPS. Przy zmianie widoczności na prywatną trzeba skonfigurować uwierzytelnienie odczytu, np. osobny klucz wdrożeniowy.
+
+Przed zmianami skrypt zapisuje kopię PostgreSQL w formacie pg_dump, pliku .env, kodu i identyfikatorów commitów w prywatnym katalogu ~/wz-portal-backups. Następnie aktualizuje kod przez fast-forward, buduje obraz, sprawdza Django, wykonuje migracje i zbiera zasoby statyczne. Odtwarza kontenery web i caddy w projekcie wz-portal i sprawdza HTTP oraz stan migracji. Baza pozostaje na dotychczasowym kontenerze i wolumenie. Zmiany obrazu lub konfiguracji usługi db wymagają osobnego wdrożenia bazy.
+
+Skrypt wymaga uruchomionej bazy oraz czystego katalogu Git na gałęzi main. Plik .env i katalog danych spraw są poza Git. Blokada flock zapobiega równoległym wdrożeniom. Lokalne kopie przed wdrożeniem obejmują bazę i konfigurację; katalog spraw i kopia poza Dellem wymagają osobnego backupu. Kopie gromadzą się do czasu ich usunięcia przez administratora.
+
+W razie błędu skrypt zatrzymuje się i wskazuje kopię. Migracje mogą już być zastosowane, dlatego odtworzenie poprzedniej wersji wymaga oceny zgodności kodu i bazy. Krótka przerwa występuje przy wymianie kontenerów. Po zmianie samego .env wykonaj docker compose -p wz-portal up -d web.
